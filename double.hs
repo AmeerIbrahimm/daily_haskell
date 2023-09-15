@@ -126,3 +126,23 @@ fib n = fib (n - 1) + fib (n - 2)
 
 myMap _ [] = []
 myMap f (x : xs) = f x : myMap f xs
+
+myFilter :: (a -> Bool) -> [a] -> [a]
+myFilter _ [] = []
+myFilter f (x : xs) =
+  if f x
+    then x : myFilter f xs
+    else myFilter f xs
+
+remove' :: (a -> Bool) -> [a] -> [a]
+remove' _ [] = []
+remove' f (x : xs) =
+  if f x
+    then remove' f xs
+    else x : remove' f xs
+
+myProduct [] = error "that is an empty list"
+myProduct xs = foldl (*) 1 xs
+
+concatAll [] = ""
+concatAll xs = foldl (++) "" xs

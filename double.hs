@@ -1,5 +1,4 @@
-import Control.Applicative (Alternative (empty))
-import Data.Binary.Get (isEmpty)
+import Data.Char qualified
 
 comparaLastNames name1 name2 =
   if comp == EQ
@@ -146,3 +145,26 @@ myProduct xs = foldl (*) 1 xs
 
 concatAll [] = ""
 concatAll xs = foldl (++) "" xs
+
+myFoldl f init [] = init
+myFoldl f init (x : xs) = myFoldl f newinit xs
+  where
+    newinit = f init x
+
+myFoldr f init [] = init
+myFoldr f init (x : xs) = f x rest
+  where
+    rest = myFoldr f init xs
+
+myElem :: (Eq a) => a -> [a] -> Bool
+myElem _ [] = False
+myElem n xs = length newlist /= length xs
+  where
+    newlist = filter (/= n) xs
+
+isPalindrome [] = True
+isPalindrome xs = reducedString == reverse reducedString
+  where
+    reducedString = map Data.Char.toLower $ filter (/= ' ') xs
+
+harmonicSum n = sum [1 / 1, 1 / 2 .. n]

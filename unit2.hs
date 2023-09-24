@@ -126,3 +126,13 @@ patientSummary p =
     ++ showBloodType (bloodType p)
     ++ "\n"
     ++ "********************"
+
+-- type Classes lesson: 13
+
+myAdd :: (Num a) => a -> a -> a -- here Num is a type class
+myAdd x y = x + y
+
+class Discribable a where
+  describe :: a -> String
+
+data IceCream = Chocolate | Venilla deriving (Show, Eq, Ord)

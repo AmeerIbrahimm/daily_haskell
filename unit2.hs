@@ -1,4 +1,3 @@
-import Text.XHtml.Transitional (abbr)
 
 -- lesson 11
 half :: Int -> Double
@@ -136,3 +135,9 @@ class Discribable a where
   describe :: a -> String
 
 data IceCream = Chocolate | Venilla deriving (Show, Eq, Ord)
+
+cycleSucc n = if n == maxBound
+  then minBound
+  else succ n
+
+minBound

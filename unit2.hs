@@ -140,4 +140,70 @@ cycleSucc n = if n == maxBound
   then minBound
   else succ n
 
-minBound
+
+-- lesson 14
+
+data SixSidedDie = S1 | S2 | S3 |S4 | S5 | S6 deriving (Eq , Ord,  Enum)
+
+instance Show SixSidedDie where
+  show S1 = "I"
+  show S2 = "II"
+  show S3 = "III"
+  show S4 = "IV"
+  show S5 = "V"
+  show S6 = "VI"
+
+-- this will cause error if u try [S1 ..]
+-- instance Enum SixSidedDie where
+--   toEnum 0 = S1
+--   toEnum 1 = S2
+--   toEnum 2 = S3
+--   toEnum 3 = S4
+--   toEnum 4 = S5
+--   toEnum 5 = S6
+--   toEnum _ = error "No such value"
+
+--   fromEnum S1 = 0
+--   fromEnum S2 = 1
+--   fromEnum S3 = 2
+--   fromEnum S4 = 3
+--   fromEnum S5 = 4
+--   fromEnum S6 = 5
+
+newtype Name1 = Name1 (String, String) deriving (Eq,Show)
+
+instance Ord Name1 where
+  compare (Name1 (f1 ,l1)) ( Name1 (f2,l2)) = compare (l2,f2) (l1,f1)
+
+
+-- Excercise
+data Number1 = One | Two | Three
+
+instance Enum Number1 where
+  toEnum 1 = One
+  toEnum 2 = Two
+  toEnum 3 = Three
+
+  fromEnum One = 1
+  fromEnum Two = 2
+  fromEnum Three = 3
+
+instance Eq Number1 where
+  (==) num1 num2 = fromEnum num1 == fromEnum num2
+
+instance Ord Number1 where
+  compare num1 num2 = compare (fromEnum num1) (fromEnum num2)
+
+data FiveSidedDie where
+  Side1 :: FiveSidedDie
+  Side2 :: FiveSidedDie
+  Side3 :: FiveSidedDie
+  Side4 :: FiveSidedDie
+  Side5 :: FiveSidedDie
+  deriving (Eq, Enum, Show)
+
+class (Eq a, Enum a) => Die a where
+  roll :: Int -> a
+
+instance Die FiveSidedDie where
+  roll n = toEnum (n `mod` 5)

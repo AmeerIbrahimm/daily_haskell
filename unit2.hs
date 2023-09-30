@@ -1,3 +1,6 @@
+import Language.Haskell.TH (reifyAnnotations)
+import Text.Read (Lexeme(Char))
+import Data.Array (indices)
 
 -- lesson 11
 half :: Int -> Double
@@ -143,7 +146,7 @@ cycleSucc n = if n == maxBound
 
 -- lesson 14
 
-data SixSidedDie = S1 | S2 | S3 |S4 | S5 | S6 deriving (Eq , Ord,  Enum)
+data SixSidedDie = S1 | S2 | S3 |S4 | S5 | S6 deriving (Eq , Ord,  Enum, Bounded)
 
 instance Show SixSidedDie where
   show S1 = "I"
@@ -207,3 +210,119 @@ class (Eq a, Enum a) => Die a where
 
 instance Die FiveSidedDie where
   roll n = toEnum (n `mod` 5)
+
+-- lesson 15
+data FourLetterAlphabet = L1 | L2 | L3 | L4 deriving ( Show , Bounded , Enum )
+
+rotN :: (Enum a, Bounded a) => Int -> a -> a
+rotN alphahabetSize c = toEnum rotation
+  where halfAlphabet = alphahabetSize `div` 2
+        offset = fromEnum c + halfAlphabet
+        rotation = offset `mod` alphahabetSize
+
+fourLetterAlphabetEncoder ::  [FourLetterAlphabet] -> [FourLetterAlphabet]
+fourLetterAlphabetEncoder vals = map rot4l vals
+  where
+    alphaSize = 1 + fromEnum (maxBound :: FourLetterAlphabet)
+    rot4l = rotN alphaSize
+
+
+rotNDecoder :: (Enum a, Bounded a) => Int -> a -> a
+rotNDecoder n c = toEnum rotation
+  where
+    halfN = n `div` 2
+    offset = if even halfN
+      then fromEnum c + halfN
+      else 1 + fromEnum c + halfN
+    rotation = offset `mod` n
+
+rotEncoder :: String -> String
+rotEncoder text = map rotChar text
+  where
+    alphaSize = 1 + fromEnum (maxBound :: Char)
+    rotChar = rotN alphaSize
+
+rotDecoder :: String -> String
+rotDecoder text = map rotChar text
+  where
+    alphaSize = 1 + fromEnum (maxBound :: Char)
+    rotChar = rotNDecoder alphaSize
+
+-- xor based encryption
+xorBool :: Bool -> Bool -> Bool
+xorBool val1 val2 = (val1 || val2) && not (val1 && val2)
+
+xorPair :: (Bool,Bool) -> Bool
+xorPair (val1,val2) = xorBool val1 val2
+
+xor :: [Bool] -> [Bool] -> [Bool]
+xor list1 list2 = map xorPair $ zip list1 list2
+
+type Bits = [Bool]
+
+intToBits' :: Int -> [Bool]
+intToBits' 0 = [False]
+intToBits' 1 = [True]
+intToBits' n = if remainder == 0
+                then False : intToBits' nextVal
+                else True : intToBits' nextVal
+  where
+    remainder = n `mod` 2
+    nextVal = n `div` 2
+
+maxBits :: Int
+maxBits = length (intToBits' maxBound)
+
+intToBits :: Int -> Bits
+intToBits n = leadingFalses ++ reversedBits
+  where
+    reversedBits = reverse $ intToBits' n
+    missingBits = maxBits - length reversedBits
+    leadingFalses = take missingBits (cycle [False])
+
+charToBits :: Char -> Bits
+charToBits char = intToBits $ fromEnum char
+
+bitsToInt :: Bits -> Int
+bitsToInt bits = sum $ map (\x -> 2 ^ (snd x)) trueLocations
+  where size = length bits
+        indices = [size-1,size-2..0]
+        trueLocations = filter (\x -> fst x == True) (zip bits indices)
+
+bitsToChar :: Bits -> Char
+bitsToChar bits = toEnum (bitsToInt bits)
+
+myPad :: String
+myPad = "Shhhhhh"
+
+myPlainText :: String
+myPlainText = "Haskell"
+
+applyOTP' :: String -> String -> [Bits]
+applyOTP' pad plainText = map (\pair -> (fst pair) `xor` (snd pair)) ( zip padBits plainTextBits)
+  where
+    padBits = map charToBits pad
+    plainTextBits = map charToBits plainText
+
+applyOTP :: String -> String -> String
+applyOTP pad plainText = map bitsToChar bitsList
+  where bitsList = applyOTP' pad plainText
+
+encoderDecoder :: String -> String
+encoderDecoder = applyOTP myPad
+
+class Chipher a where
+  encode :: a -> String -> String
+  decode :: a -> String -> String
+
+data Rot = Rot
+
+instance Chipher Rot where
+  encode Rot text = rotEncoder text
+  decode Rot text = rotDecoder text
+
+newtype OneTimePad = OTP String
+
+instance Chipher OneTimePad where
+  encode (OTP pad) text = applyOTP pad text
+  decode (OTP pad) text = applyOTP pad text

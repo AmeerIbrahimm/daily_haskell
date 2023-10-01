@@ -326,3 +326,6 @@ newtype OneTimePad = OTP String
 instance Chipher OneTimePad where
   encode (OTP pad) text = applyOTP pad text
   decode (OTP pad) text = applyOTP pad text
+
+prng :: Int -> Int -> Int -> Int -> Int
+prng a b maxVal seed = (a * seed + b) `mod` maxVal

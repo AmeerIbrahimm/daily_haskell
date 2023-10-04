@@ -1,7 +1,3 @@
-import Language.Haskell.TH (reifyAnnotations)
-import Text.Read (Lexeme(Char))
-import Data.Array (indices)
-
 -- lesson 11
 half :: Int -> Double
 half 0 = error "cant get the half of 0"

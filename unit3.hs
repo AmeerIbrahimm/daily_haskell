@@ -1,7 +1,6 @@
+{-# OPTIONS_GHC -Wno-noncanonical-monoid-instances #-}
 import Data.Semigroup
 import Data.List (sort)
-import Distribution.PackageDescription.Quirks (patchQuirks)
-import Control.Applicative (Applicative(liftA2))
 import Foreign.C (e2BIG)
 -- lesson: 16
 
@@ -96,9 +95,12 @@ data Color = Red |
   Blue |
   Purple |
   Orange |
-  Brown deriving (Show, Eq)
+  Brown |
+  Transparent deriving (Show, Eq)
 
 instance Semigroup Color where
+  (<>) any Transparent = any
+  (<>) Transparent any = any
   (<>) Red Blue = Purple
   (<>) Blue Red = Purple
   (<>) Yellow Blue = Green
@@ -110,6 +112,10 @@ instance Semigroup Color where
            | all (`elem` [Red,Blue,Purple]) [a,b] = Purple
            | all (`elem` [Blue,Green,Yellow]) [a,b] = Green
            | all (`elem` [Brown,Yellow,Orange]) [a,b] = Orange
+
+instance Monoid Color where
+  mempty = Transparent
+  mappend col1 col2 = col1 <> col2
 
 -- Monoids
 
@@ -147,3 +153,15 @@ combineEvents e1 e2 = cartCombine combiner e1 e2
 
 combineProbs :: Probs -> Probs -> Probs
 combineProbs p1 p2 = cartCombine (*) p1 p2
+
+instance Semigroup PTable where
+  (<>) ptable1 (PTable [] []) = ptable1
+  (<>) (PTable [] []) ptable2 = ptable2
+  (<>) (PTable e1 p1) (PTable e2 p2) = createPTable newEvents newProbs
+        where
+          newEvents = combineEvents e1 e2
+          newProbs = combineProbs p1 p2
+
+instance Monoid PTable where
+  mempty = PTable [] []
+  mappend = (<>)

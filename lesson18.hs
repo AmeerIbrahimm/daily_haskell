@@ -1,3 +1,5 @@
+import Data.Map (Map)
+import qualified Data.Map as Map
 data Box a = Box a deriving Show
 
 data Triple a = Triple a a a deriving Show
@@ -51,3 +53,20 @@ boxMap f (Box a) = Box (f a)
 
 tripleMap :: (a -> b) -> Triple a -> Triple b
 tripleMap f (Triple x y z) = Triple (f x) (f y) (f z)
+
+data Organ = Heart | Brain | Kidney | Spleen deriving (Show,Eq, Ord)
+
+organs :: [Organ]
+organs = [Heart,Heart,Brain,Spleen,Spleen,Kidney]
+
+keys :: [Int]
+keys = [1,4,5,7,9,15]
+
+organPairs :: [(Int,Organ)]
+organPairs = zip keys organs
+
+organCatalog :: Map.Map Int Organ
+organCatalog = Map.fromList organPairs
+
+organCate :: Map.Map Organ Int
+organCate = Map.fromList $ zip organs keys
